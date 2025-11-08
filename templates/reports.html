@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Reports | Personal Finance Tracker{% endblock %}
+{% block content %}
+
+<!-- Header + Actions -->
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+  <div>
+    <h3 class="fw-semibold">Financial Reports</h3>
+    <p class="text-muted mb-0">Visualize spending patterns and track budget performance.</p>
+  </div>
+  <div class="mt-3 mt-md-0 d-flex gap-2">
+    <button class="btn btn-outline-secondary"><i class="bi bi-download"></i> Export CSV</button>
+    <button class="btn btn-outline-secondary"><i class="bi bi-filetype-pdf"></i> Export PDF</button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card p-3 mt-3">
+  <form class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Preset</label>
+      <select class="form-select" id="preset">
+        <option>This Month</option>
+        <option>Last Month</option>
+        <option>Last 3 Months</option>
+        <option>Year to Date</option>
+        <option>Custom</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">From</label>
+      <input type="date" class="form-control" id="fromDate">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">To</label>
+      <input type="date" class="form-control" id="toDate">
+    </div>
+    <div class="col-md-3">
+      <button type="button" class="btn btn-primary w-100" id="applyBtn"><i class="bi bi-funnel"></i> Apply</button>
+    </div>
+  </form>
+</div>
+
+<!-- KPI cards -->
+<div class="row g-4 mt-3">
+  <div class="col-md-4">
+    <div class="card text-center p-4">
+      <div class="text-success fs-2"><i class="bi bi-graph-up-arrow"></i></div>
+      <h6 class="text-muted">Total Income</h6>
+      <h3 class="mb-0" id="kpiIncome">$3,240.00</h3>
+      <small class="text-muted">vs previous period: <span class="text-success">+6%</span></small>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center p-4">
+      <div class="text-danger fs-2"><i class="bi bi-graph-down-arrow"></i></div>
+      <h6 class="text-muted">Total Expenses</h6>
+      <h3 class="mb-0" id="kpiExpense">$1,602.73</h3>
+      <small class="text-muted">of budget used: <span class="text-danger">91.6%</span></small>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center p-4">
+      <div class="text-primary fs-2"><i class="bi bi-wallet2"></i></div>
+      <h6 class="text-muted">Net Balance</h6>
+      <h3 class="mb-0" id="kpiBalance">$1,637.27</h3>
+      <small class="text-muted">healthy trend</small>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mt-1">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Expense by Category</h5>
+        <span class="text-muted small">pie</span>
+      </div>
+      <canvas id="pieChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Income vs Expense</h5>
+        <span class="text-muted small">Monthly</span>
+      </div>
+      <canvas id="barChart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Category breakdown -->
+<div class="card mt-4">
+  <div class="table-responsive">
+    <table class="table table-borderless align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Category</th>
+          <th class="text-end">Amount</th>
+          <th class="text-end">Share</th>
+          <th class="text-end">Budget</th>
+          <th class="text-end">Utilization</th>
+        </tr>
+      </thead>
+      <tbody id="catBody">
+        <!-- rows filled by script (demo data below) -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ----- Demo data (you'll replace with real later) -----
+  const categories = [
+    { name:'Rent', amount: 800, budget: 800 },
+    { name:'Groceries', amount: 345.80, budget: 300 },
+    { name:'Transport', amount: 180.50, budget: 150 },
+    { name:'Entertainment', amount: 125.99, budget: 120 },
+    { name:'Shopping', amount: 210.45, budget: 250 },
+    { name:'Bills', amount: 450.00, budget: 500 }
+  ];
+  const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun'];
+  const incomeSeries = [3200,3100,3400,3300,3500,3700];
+  const expenseSeries = [2500,2600,2800,2700,3000,3100];
+
+  // ----- KPIs -----
+  const income = incomeSeries[incomeSeries.length-1];
+  const expense = categories.reduce((s,c)=>s+c.amount,0);
+  const balance = income - expense;
+  document.getElementById('kpiIncome').textContent = `$${income.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+  document.getElementById('kpiExpense').textContent = `$${expense.toFixed(2)}`;
+  document.getElementById('kpiBalance').textContent = `$${balance.toFixed(2)}`;
+
+  // ----- Fill category table -----
+  const total = expense;
+  const tbody = document.getElementById('catBody');
+  tbody.innerHTML = '';
+  categories.forEach(c=>{
+    const share = total ? (c.amount/total*100).toFixed(1)+'%' : '-';
+    const util = c.budget ? Math.round(c.amount/c.budget*100) : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.name}</td>
+      <td class="text-end">$${c.amount.toFixed(2)}</td>
+      <td class="text-end">${share}</td>
+      <td class="text-end">$${(c.budget||0).toFixed(2)}</td>
+      <td class="text-end">
+        <span class="badge ${util>100?'bg-danger':'bg-success'} bg-opacity-10 ${util>100?'text-danger':'text-success'}">
+          ${util}%
+        </span>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  // ----- pie: expense by category -----
+  const pie = document.getElementById('pieChart').getContext('2d');
+  new Chart(pie, {
+    type: 'doughnut',
+    data: {
+      labels: categories.map(c=>c.name),
+      datasets: [{
+        data: categories.map(c=>c.amount),
+        // Chart.js will auto-pick colors; looks nice with our UI
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks:{
+          label: (ctx)=>{
+            const val = ctx.parsed;
+            const pct = total ? (val/total*100).toFixed(1) : 0;
+            return `${ctx.label}: $${val.toFixed(2)} (${pct}%)`;
+          }
+        }}
+      },
+      cutout: '60%'
+    }
+  });
+
+  // ----- Bar: income vs expense (monthly) -----
+  const bar = document.getElementById('barChart').getContext('2d');
+  new Chart(bar, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Income', data: incomeSeries },
+        { label: 'Expenses', data: expenseSeries }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // ----- Filters (demo only) -----
+  document.getElementById('applyBtn')?.addEventListener('click', ()=>{
+    alert('Filters applied (demo) — later we’ll hook to backend.');
+  });
+});
+</script>
+
+{% endblock %}

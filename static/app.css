@@ -1,0 +1,67 @@
+/* ====== THEME ====== */
+:root {
+  --bg: linear-gradient(135deg, #eef3f9, #f9fbfc);
+  --surface: rgba(255,255,255,.9);
+  --text: #1a1a1a;
+  --primary: #0d6efd;
+}
+
+/* PAGE BACKGROUND */
+body {
+  background: var(--bg);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+}
+
+/* NAVBAR (hidden automatically via base.html conditions) */
+.navbar {
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  padding: 12px 24px;
+}
+
+/* ✅ NAVBAR LOGO SIZE */
+/* Force a small navbar logo size everywhere */
+.nav-logo {
+  width: 26px !important;      /* try 22–32 if you want smaller/bigger */
+  height: 26px !important;
+  object-fit: contain !important;
+  margin-right: 8px !important;
+  padding: 0 !important;
+  display: inline-block !important;
+}
+
+/* In case there is any global img rule */
+.navbar img { max-width: none !important; height: auto; }
+
+/* LOGIN CARD */
+.login-card {
+  width: 420px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+/* ✅ LOGIN PAGE LOGO SIZE (adjust this for login) */
+.login-logo {
+  width: 156px !important;
+  height: 156px !important;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* INPUT FIELDS */
+form input, form select {
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+}
+
+/* BUTTONS */
+.btn-primary {
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0d6efd, #4a8bff);
+  border: none;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0b5ed7, #3678f5);
+}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Transactions | Personal Finance Tracker{% endblock %}
+{% block content %}
+<div class="text-center">
+  <h3>Manage Transactions</h3>
+  <p class="text-muted">Add, view, and manage your income and expenses</p>
+</div>
+<div class="card p-4 mt-3">
+  <h5 class="mb-4"><i class="bi bi-plus-circle text-primary"></i> Add New Transaction</h5>
+  <form>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Transaction Type</label>
+        <select class="form-select" required>
+          <option value="">Select Type</option><option>Income</option><option>Expense</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Category</label>
+        <select class="form-select" required>
+          <option value="">Select Category</option>
+          <option>Food</option><option>Transport</option><option>Rent</option>
+          <option>Utilities</option><option>Entertainment</option><option>Shopping</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Amount</label>
+        <input type="number" class="form-control" placeholder="$" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-control" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Payment Method</label>
+        <select class="form-select"><option>Cash</option><option>Credit Card</option><option>Bank Transfer</option><option>Digital Wallet</option></select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Notes</label>
+        <input type="text" class="form-control" placeholder="Optional notes...">
+      </div>
+    </div>
+    <div class="text-end mt-4"><button class="btn btn-primary px-4"><i class="bi bi-save"></i> Save Transaction</button></div>
+  </form>
+</div>
+
+<div class="mt-5">
+  <h5 class="mb-3">Recent Transactions</h5>
+  <div class="table-responsive">
+    <table class="table table-borderless align-middle">
+      <thead class="table-light">
+        <tr><th>Date</th><th>Category</th><th>Type</th><th>Amount</th><th>Payment Method</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2025-10-10</td><td>Salary</td><td><span class="badge bg-success bg-opacity-10 text-success">Income</span></td><td class="text-success">$2,000.00</td><td>Bank Transfer</td><td>October Salary</td></tr>
+        <tr><td>2025-10-12</td><td>Grocery</td><td><span class="badge bg-danger bg-opacity-10 text-danger">Expense</span></td><td class="text-danger">-$150.00</td><td>Cash</td><td>Weekly groceries</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

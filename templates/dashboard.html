@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Personal Finance Tracker{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center flex-wrap" style="margin: 40px 0 10px;">
+  <div>
+    <h3 class="fw-semibold" style="color:#1a1a1a;">Dashboard</h3>
+    <p class="text-muted mb-0">Welcome back! Here's your financial overview.</p>
+  </div>
+  <div class="d-flex gap-2 mt-3 mt-md-0">
+    <a class="btn btn-outline-secondary" href="{{ url_for('reports') }}"><i class="bi bi-bar-chart-line"></i> View Reports</a>
+    <a class="btn btn-primary" href="{{ url_for('transactions') }}"><i class="bi bi-plus-lg"></i> Add Transaction</a>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="row g-4 mt-1">
+  <div class="col-md-4">
+    <div class="card kpi">
+      <i class="bi bi-arrow-up-circle text-success fs-2"></i>
+      <h6 class="text-muted">Total Income</h6>
+      <h3 class="fw-semibold">$3,240.00</h3>
+      <span class="text-success growth"><i class="bi bi-graph-up"></i> +12%</span>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card kpi">
+      <i class="bi bi-arrow-down-circle text-danger fs-2"></i>
+      <h6 class="text-muted">Total Expenses</h6>
+      <h3 class="fw-semibold">$2,156.80</h3>
+      <span class="text-danger growth"><i class="bi bi-graph-down"></i> +8%</span>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card kpi">
+      <i class="bi bi-wallet2 text-primary fs-2"></i>
+      <h6 class="text-muted">Current Balance</h6>
+      <h3 class="fw-semibold">$1,083.20</h3>
+      <span class="text-success growth"><i class="bi bi-graph-up"></i> +4%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Recent table -->
+<div class="table-responsive mt-4 mb-5">
+  <table class="table table-borderless">
+    <thead class="table-light">
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2025-10-10</td>
+        <td>Salary Deposit</td>
+        <td>Income</td>
+        <td><span class="badge bg-success bg-opacity-10 text-success">Credit</span></td>
+        <td class="text-success">$2,000.00</td>
+      </tr>
+      <tr>
+        <td>2025-10-12</td>
+        <td>Grocery Shopping</td>
+        <td>Food</td>
+        <td><span class="badge bg-danger bg-opacity-10 text-danger">Debit</span></td>
+        <td class="text-danger">-$150.00</td>
+      </tr>
+      <tr>
+        <td>2025-10-14</td>
+        <td>Internet Bill</td>
+        <td>Utilities</td>
+        <td><span class="badge bg-danger bg-opacity-10 text-danger">Debit</span></td>
+        <td class="text-danger">-$60.00</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

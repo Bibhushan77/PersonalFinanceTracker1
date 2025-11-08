@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not Found | Personal Finance Tracker{% endblock %}
+{% block content %}
+<div class="text-center">
+  <h2 class="mb-2">404</h2>
+  <p class="text-muted">That page doesn’t exist.</p>
+  <a class="btn btn-primary" href="{{ url_for('dashboard') }}"><i class="bi bi-house"></i> Go Home</a>
+</div>
+{% endblock %}
