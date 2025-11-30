@@ -15,7 +15,7 @@
 <body>
 
   {# Hide navbar on login and forgot pages only #}
-  {% set hide_nav = request.endpoint in ['auth_login', 'auth_forgot'] %}
+  {% set hide_nav = request.endpoint in ['auth_login', 'auth_forgot', 'auth_register'] %}
   {% if not hide_nav %}
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
@@ -37,6 +37,7 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('transactions') }}">Transactions</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('reports') }}">Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_budgets') }}">Budgets</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('recurring') }}">Recurring</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">

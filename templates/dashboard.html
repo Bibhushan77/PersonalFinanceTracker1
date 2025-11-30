@@ -6,77 +6,111 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap" style="margin: 40px 0 10px;">
   <div>
     <h3 class="fw-semibold" style="color:#1a1a1a;">Dashboard</h3>
-    <p class="text-muted mb-0">Welcome back! Here's your financial overview.</p>
+
+    <!-- UPDATED LINE BELOW -->
+    <p class="text-muted mb-0">
+      Welcome back, <span class="fw-bold text-dark">{{ first_name }}</span>! Here's your financial overview.
+    </p>
   </div>
+
   <div class="d-flex gap-2 mt-3 mt-md-0">
-    <a class="btn btn-outline-secondary" href="{{ url_for('reports') }}"><i class="bi bi-bar-chart-line"></i> View Reports</a>
-    <a class="btn btn-primary" href="{{ url_for('transactions') }}"><i class="bi bi-plus-lg"></i> Add Transaction</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('reports') }}">
+      <i class="bi bi-bar-chart-line"></i> View Reports
+    </a>
+    <a class="btn btn-primary" href="{{ url_for('add_transaction') }}">
+      <i class="bi bi-plus-lg"></i> Add Transaction
+    </a>
   </div>
 </div>
 
-<!-- KPIs -->
+<!-- KPI Cards -->
 <div class="row g-4 mt-1">
   <div class="col-md-4">
-    <div class="card kpi">
+    <div class="card kpi text-center d-flex flex-column align-items-center p-3">
       <i class="bi bi-arrow-up-circle text-success fs-2"></i>
-      <h6 class="text-muted">Total Income</h6>
-      <h3 class="fw-semibold">$3,240.00</h3>
-      <span class="text-success growth"><i class="bi bi-graph-up"></i> +12%</span>
+      <h6 class="text-muted mt-2">Total Income</h6>
+      <h3 class="fw-semibold">${{ "%.2f"|format(total_income or 0) }}</h3>
+      <span class="text-success growth">
+        <i class="bi bi-graph-up"></i> From all income transactions
+      </span>
     </div>
   </div>
+
   <div class="col-md-4">
-    <div class="card kpi">
+    <div class="card kpi text-center d-flex flex-column align-items-center p-3">
       <i class="bi bi-arrow-down-circle text-danger fs-2"></i>
-      <h6 class="text-muted">Total Expenses</h6>
-      <h3 class="fw-semibold">$2,156.80</h3>
-      <span class="text-danger growth"><i class="bi bi-graph-down"></i> +8%</span>
+      <h6 class="text-muted mt-2">Total Expenses</h6>
+      <h3 class="fw-semibold">${{ "%.2f"|format(total_expenses or 0) }}</h3>
+      <span class="text-danger growth">
+        <i class="bi bi-graph-down"></i> From all expense transactions
+      </span>
     </div>
   </div>
+
   <div class="col-md-4">
-    <div class="card kpi">
+    <div class="card kpi text-center d-flex flex-column align-items-center p-3">
       <i class="bi bi-wallet2 text-primary fs-2"></i>
-      <h6 class="text-muted">Current Balance</h6>
-      <h3 class="fw-semibold">$1,083.20</h3>
-      <span class="text-success growth"><i class="bi bi-graph-up"></i> +4%</span>
+      <h6 class="text-muted mt-2">Current Balance</h6>
+      <h3 class="fw-semibold">${{ "%.2f"|format(balance or 0) }}</h3>
+
+      <span class="{% if balance >= 0 %}text-success{% else %}text-danger{% endif %} growth">
+        {% if balance >= 0 %}
+          <i class="bi bi-graph-up"></i> In positive balance
+        {% else %}
+          <i class="bi bi-graph-down"></i> In negative balance
+        {% endif %}
+      </span>
     </div>
   </div>
 </div>
 
-<!-- Recent table -->
+<!-- Recent Transactions Table -->
 <div class="table-responsive mt-4 mb-5">
-  <table class="table table-borderless">
+  <h5 class="mb-3">Recent Transactions</h5>
+
+  <table class="table table-borderless align-middle">
     <thead class="table-light">
       <tr>
         <th>Date</th>
         <th>Description</th>
         <th>Category</th>
         <th>Type</th>
-        <th>Amount</th>
+        <th class="text-end">Amount</th>
       </tr>
     </thead>
+
     <tbody>
+      {% if recent_transactions %}
+        {% for t in recent_transactions %}
+        <tr>
+          <td>{{ t.date }}</td>
+          <td>{{ t.description }}</td>
+          <td>{{ t.category }}</td>
+
+          <td>
+            {% if t.type == 'Income' %}
+              <span class="badge bg-success bg-opacity-10 text-success">Income</span>
+            {% else %}
+              <span class="badge bg-danger bg-opacity-10 text-danger">Expense</span>
+            {% endif %}
+          </td>
+
+          <td class="text-end {% if t.type == 'Income' %}text-success{% else %}text-danger{% endif %}">
+            ${{ "%.2f"|format(t.amount) }}
+          </td>
+
+        </tr>
+        {% endfor %}
+      {% else %}
       <tr>
-        <td>2025-10-10</td>
-        <td>Salary Deposit</td>
-        <td>Income</td>
-        <td><span class="badge bg-success bg-opacity-10 text-success">Credit</span></td>
-        <td class="text-success">$2,000.00</td>
+        <td colspan="5" class="text-center text-muted py-4">
+          No transactions yet. 
+          <a href="{{ url_for('add_transaction') }}">Add your first transaction</a>.
+        </td>
       </tr>
-      <tr>
-        <td>2025-10-12</td>
-        <td>Grocery Shopping</td>
-        <td>Food</td>
-        <td><span class="badge bg-danger bg-opacity-10 text-danger">Debit</span></td>
-        <td class="text-danger">-$150.00</td>
-      </tr>
-      <tr>
-        <td>2025-10-14</td>
-        <td>Internet Bill</td>
-        <td>Utilities</td>
-        <td><span class="badge bg-danger bg-opacity-10 text-danger">Debit</span></td>
-        <td class="text-danger">-$60.00</td>
-      </tr>
+      {% endif %}
     </tbody>
   </table>
 </div>
+
 {% endblock %}

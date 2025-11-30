@@ -1,61 +1,74 @@
 {% extends "base.html" %}
 {% block title %}Transactions | Personal Finance Tracker{% endblock %}
 {% block content %}
-<div class="text-center">
-  <h3>Manage Transactions</h3>
-  <p class="text-muted">Add, view, and manage your income and expenses</p>
-</div>
-<div class="card p-4 mt-3">
-  <h5 class="mb-4"><i class="bi bi-plus-circle text-primary"></i> Add New Transaction</h5>
-  <form>
-    <div class="row g-3">
-      <div class="col-md-4">
-        <label class="form-label">Transaction Type</label>
-        <select class="form-select" required>
-          <option value="">Select Type</option><option>Income</option><option>Expense</option>
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Category</label>
-        <select class="form-select" required>
-          <option value="">Select Category</option>
-          <option>Food</option><option>Transport</option><option>Rent</option>
-          <option>Utilities</option><option>Entertainment</option><option>Shopping</option>
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Amount</label>
-        <input type="number" class="form-control" placeholder="$" required>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Date</label>
-        <input type="date" class="form-control" required>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Payment Method</label>
-        <select class="form-select"><option>Cash</option><option>Credit Card</option><option>Bank Transfer</option><option>Digital Wallet</option></select>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Notes</label>
-        <input type="text" class="form-control" placeholder="Optional notes...">
-      </div>
-    </div>
-    <div class="text-end mt-4"><button class="btn btn-primary px-4"><i class="bi bi-save"></i> Save Transaction</button></div>
-  </form>
-</div>
 
-<div class="mt-5">
-  <h5 class="mb-3">Recent Transactions</h5>
-  <div class="table-responsive">
-    <table class="table table-borderless align-middle">
-      <thead class="table-light">
-        <tr><th>Date</th><th>Category</th><th>Type</th><th>Amount</th><th>Payment Method</th><th>Notes</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>2025-10-10</td><td>Salary</td><td><span class="badge bg-success bg-opacity-10 text-success">Income</span></td><td class="text-success">$2,000.00</td><td>Bank Transfer</td><td>October Salary</td></tr>
-        <tr><td>2025-10-12</td><td>Grocery</td><td><span class="badge bg-danger bg-opacity-10 text-danger">Expense</span></td><td class="text-danger">-$150.00</td><td>Cash</td><td>Weekly groceries</td></tr>
-      </tbody>
-    </table>
+<div class="d-flex justify-content-between align-items-center flex-wrap">
+  <div class="text-start">
+    <h3>Manage Transactions</h3>
+    <p class="text-muted mb-0">Add, view, and manage your income and expenses</p>
+  </div>
+  <div class="mt-3 mt-md-0">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Add New Transaction
+    </a>
   </div>
 </div>
+
+<div class="mt-4">
+  <div class="card p-3">
+    <h5 class="mb-3">Recent Transactions</h5>
+    <div class="table-responsive">
+      <table class="table table-borderless align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Type</th>
+            <th class="text-end">Amount</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if transactions %}
+            {% for t in transactions %}
+              <tr>
+                <td>{{ t.date }}</td>
+                <td>{{ t.description }}</td>
+                <td>{{ t.category }}</td>
+                <td>
+                  {% if t.type == 'Income' %}
+                    <span class="badge bg-success bg-opacity-10 text-success">Income</span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger">Expense</span>
+                  {% endif %}
+                </td>
+                <td class="text-end {% if t.type == 'Income' %}text-success{% else %}text-danger{% endif %}">
+                  ${{ "%.2f"|format(t.amount) }}
+                </td>
+
+                <!-- DELETE BUTTON -->
+                <td class="text-end">
+                  <form method="POST" action="{{ url_for('delete_transaction', tid=t.id) }}">
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Delete this transaction?');">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                No transactions yet. <a href="{{ url_for('add_transaction') }}">Add your first transaction</a>.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -5,29 +5,47 @@
 <div class="d-flex justify-content-center align-items-center" style="min-height:85vh;">
   <div class="card p-4 shadow-sm" style="width:360px; border-radius:12px;">
     <div class="text-center" style="margin-bottom: 0;">
-  <img src="{{ url_for('static', filename='img/logo.png') }}"
-       alt="Logo"
-       style="width:250px;height:250px;object-fit:contain;display:block;margin:0 auto;">
-</div>
+      <img src="{{ url_for('static', filename='img/logo.png') }}"
+           alt="Logo"
+           style="width:250px;height:250px;object-fit:contain;display:block;margin:0 auto;">
+    </div>
 
-<h4 class="text-center fw-semibold" style="margin-top: -40px; margin-bottom: 6px;">
-  Welcome Back
-</h4>
+    <h4 class="text-center fw-semibold" style="margin-top: -40px; margin-bottom: 6px;">
+      Welcome Back
+    </h4>
 
-    <p class="text-center text-muted mb-4" style="font-size:14px;">Sign in to manage your finances</p>
+    <p class="text-center text-muted mb-2" style="font-size:14px;">
+      Sign in to manage your finances
+    </p>
+
+    {# 🔹 Show flashed error/success messages here #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} py-1 small mb-3">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <form method="post">
       <div class="mb-3">
         <label class="form-label" for="email">Email</label>
-        <input id="email" name="email" type="email" class="form-control" placeholder="you@example.com" required>
+        <input id="email" name="email" type="email"
+               class="form-control" placeholder="you@example.com" required>
       </div>
       <div class="mb-3">
         <label class="form-label" for="password">Password</label>
-        <input id="password" name="password" type="password" class="form-control" placeholder="••••••" required>
+        <input id="password" name="password" type="password"
+               class="form-control" placeholder="••••••" required>
       </div>
       <button class="btn btn-primary w-100 py-2">Log In</button>
-      <div class="text-end mt-2">
-        <a href="{{ url_for('auth_forgot') }}" class="text-decoration-none" style="font-size:14px;">Forgot password?</a>
+      <div class="d-flex justify-content-between mt-2">
+        <a href="{{ url_for('auth_forgot') }}"
+           class="text-decoration-none" style="font-size:14px;">Forgot password?</a>
+        <a href="{{ url_for('auth_register') }}"
+           class="text-decoration-none" style="font-size:14px;">Create account</a>
       </div>
     </form>
   </div>

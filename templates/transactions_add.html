@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Add Transaction | Personal Finance Tracker{% endblock %}
+{% block content %}
+
+<div class="mx-auto" style="max-width: 480px;">
+  <div class="card p-4 mt-3">
+    <h4 class="fw-semibold mb-3">Add Transaction</h4>
+
+    <form method="post" action="{{ url_for('add_transaction') }}">
+
+      <!-- Date -->
+      <div class="mb-3">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" required>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <input type="text" name="description" class="form-control" placeholder="e.g. Grocery Shopping" >
+      </div>
+
+      <!-- Type (Income / Expense) -->
+      <div class="mb-3">
+        <label class="form-label">Type</label>
+        <select name="type" id="type-select" class="form-select" required>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+      </div>
+
+      <!-- Category (changes based on Type) -->
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select name="category" id="category-select" class="form-select" required>
+          <!-- options will be filled by JS -->
+        </select>
+      </div>
+
+      <!-- Amount -->
+      <div class="mb-3">
+        <label class="form-label">Amount</label>
+        <input type="number" step="0.01" name="amount" class="form-control" placeholder="e.g. 150.00" required>
+      </div>
+
+      <button class="btn btn-primary w-100">Save Transaction</button>
+    </form>
+  </div>
+</div>
+
+<!-- Simple JS to switch categories -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const typeSelect = document.getElementById("type-select");
+    const categorySelect = document.getElementById("category-select");
+
+    const incomeCategories = [
+      "Salary",
+      "Bonus",
+      "Freelance",
+      "Interest",
+      "Refund",
+      "Other Income"
+    ];
+
+    const expenseCategories = [
+      "Food",
+      "Transport",
+      "Rent",
+      "Utilities",
+      "Entertainment",
+      "Shopping",
+      "Health",
+      "Education",
+      "Other Expense"
+    ];
+
+    function populateCategories(type) {
+      categorySelect.innerHTML = "";  // clear previous options
+
+      const source = type === "Income" ? incomeCategories : expenseCategories;
+
+      source.forEach(function (cat) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+      });
+    }
+
+    // initial load (default is Income)
+    populateCategories(typeSelect.value);
+
+    // when type changes, update categories
+    typeSelect.addEventListener("change", function () {
+      populateCategories(this.value);
+    });
+  });
+</script>
+
+{% endblock %}

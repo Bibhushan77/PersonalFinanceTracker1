@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Register | Personal Finance Tracker{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height:85vh;">
+  <div class="card p-4 shadow-sm" style="width:380px; border-radius:12px;">
+    <h4 class="text-center fw-semibold mb-1">Create Account</h4>
+    <p class="text-center text-muted mb-3" style="font-size:14px;">
+      Sign up to start tracking your money
+    </p>
+
+    {% if error %}
+      <div class="alert alert-danger py-1 small mb-3">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label" for="name">Full Name</label>
+        <input id="name" name="name" type="text"
+               class="form-control" placeholder="Bibhushan Maharjan" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="email">Email</label>
+        <input id="email" name="email" type="email"
+               class="form-control" placeholder="you@example.com" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input id="password" name="password" type="password"
+               class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password2">Confirm Password</label>
+        <input id="password2" name="password2" type="password"
+               class="form-control" required>
+      </div>
+      <button class="btn btn-primary w-100 py-2">Sign Up</button>
+      <div class="text-center mt-2">
+        <span style="font-size:14px;">Already have an account?</span>
+        <a href="{{ url_for('auth_login') }}" style="font-size:14px;">Log in</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

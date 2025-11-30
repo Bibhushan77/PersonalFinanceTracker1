@@ -9,14 +9,20 @@
     <p class="text-muted mb-0">Visualize spending patterns and track budget performance.</p>
   </div>
   <div class="mt-3 mt-md-0 d-flex gap-2">
-    <button class="btn btn-outline-secondary"><i class="bi bi-download"></i> Export CSV</button>
-    <button class="btn btn-outline-secondary"><i class="bi bi-filetype-pdf"></i> Export PDF</button>
+<a class="btn btn-outline-secondary" href="{{ url_for('export_csv') }}">
+    <i class="bi bi-download"></i> Export CSV
+</a>
+
+<a class="btn btn-outline-secondary" href="{{ url_for('export_pdf') }}">
+    <i class="bi bi-filetype-pdf"></i> Export PDF
+</a>
+
   </div>
 </div>
 
 <!-- Filters -->
 <div class="card p-3 mt-3">
-  <form class="row g-3 align-items-end">
+  <form id="reportFilterForm" class="row g-3 align-items-end" method="get" action="{{ url_for('reports') }}">
     <div class="col-md-3">
       <label class="form-label">Preset</label>
       <select class="form-select" id="preset">
@@ -29,14 +35,18 @@
     </div>
     <div class="col-md-3">
       <label class="form-label">From</label>
-      <input type="date" class="form-control" id="fromDate">
+      <input type="date" class="form-control" id="fromDate" name="fromDate"
+             value="{{ from_date or '' }}">
     </div>
     <div class="col-md-3">
       <label class="form-label">To</label>
-      <input type="date" class="form-control" id="toDate">
+      <input type="date" class="form-control" id="toDate" name="toDate"
+             value="{{ to_date or '' }}">
     </div>
     <div class="col-md-3">
-      <button type="button" class="btn btn-primary w-100" id="applyBtn"><i class="bi bi-funnel"></i> Apply</button>
+      <button type="submit" class="btn btn-primary w-100" id="applyBtn">
+        <i class="bi bi-funnel"></i> Apply
+      </button>
     </div>
   </form>
 </div>
@@ -47,7 +57,9 @@
     <div class="card text-center p-4">
       <div class="text-success fs-2"><i class="bi bi-graph-up-arrow"></i></div>
       <h6 class="text-muted">Total Income</h6>
-      <h3 class="mb-0" id="kpiIncome">$3,240.00</h3>
+      <h3 class="mb-0">
+        ${{ "%.2f"|format(total_income or 0) }}
+      </h3>
       <small class="text-muted">vs previous period: <span class="text-success">+6%</span></small>
     </div>
   </div>
@@ -55,7 +67,9 @@
     <div class="card text-center p-4">
       <div class="text-danger fs-2"><i class="bi bi-graph-down-arrow"></i></div>
       <h6 class="text-muted">Total Expenses</h6>
-      <h3 class="mb-0" id="kpiExpense">$1,602.73</h3>
+      <h3 class="mb-0">
+        ${{ "%.2f"|format(total_expenses or 0) }}
+      </h3>
       <small class="text-muted">of budget used: <span class="text-danger">91.6%</span></small>
     </div>
   </div>
@@ -63,35 +77,46 @@
     <div class="card text-center p-4">
       <div class="text-primary fs-2"><i class="bi bi-wallet2"></i></div>
       <h6 class="text-muted">Net Balance</h6>
-      <h3 class="mb-0" id="kpiBalance">$1,637.27</h3>
-      <small class="text-muted">healthy trend</small>
+      <h3 class="mb-0">
+        ${{ "%.2f"|format(balance or 0) }}
+      </h3>
+      <small class="text-muted">
+        {% if balance >= 0 %}
+          healthy trend
+        {% else %}
+          negative trend
+        {% endif %}
+      </small>
     </div>
   </div>
 </div>
 
 <!-- Charts -->
 <div class="row g-4 mt-1">
+  <!-- EXPENSE PIE -->
   <div class="col-md-6">
     <div class="card p-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">Expense by Category</h5>
-        <span class="text-muted small">pie</span>
+        <span class="text-muted small">PieChart</span>
       </div>
-      <canvas id="pieChart" height="220"></canvas>
+      <canvas id="pieChartExpense" height="220"></canvas>
     </div>
   </div>
+
+  <!-- INCOME vs EXPENSE BAR -->
   <div class="col-md-6">
     <div class="card p-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">Income vs Expense</h5>
-        <span class="text-muted small">Monthly</span>
+        <span class="text-muted small">BarGraph</span>
       </div>
       <canvas id="barChart" height="220"></canvas>
     </div>
   </div>
 </div>
 
-<!-- Category breakdown -->
+<!-- Category breakdown (Expenses) -->
 <div class="card mt-4">
   <div class="table-responsive">
     <table class="table table-borderless align-middle mb-0">
@@ -104,106 +129,151 @@
           <th class="text-end">Utilization</th>
         </tr>
       </thead>
-      <tbody id="catBody">
-        <!-- rows filled by script (demo data below) -->
-      </tbody>
+      <tbody id="catBody"></tbody>
     </table>
   </div>
 </div>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ----- Demo data (you'll replace with real later) -----
-  const categories = [
-    { name:'Rent', amount: 800, budget: 800 },
-    { name:'Groceries', amount: 345.80, budget: 300 },
-    { name:'Transport', amount: 180.50, budget: 150 },
-    { name:'Entertainment', amount: 125.99, budget: 120 },
-    { name:'Shopping', amount: 210.45, budget: 250 },
-    { name:'Bills', amount: 450.00, budget: 500 }
+  // ---------------------- PRESET HANDLING ----------------------
+  const presetSelect = document.getElementById('preset');
+  const fromInput = document.getElementById('fromDate');
+  const toInput = document.getElementById('toDate');
+  const form = document.getElementById('reportFilterForm');
+  const applyBtn = document.getElementById('applyBtn');
+
+  function formatDate(d) {
+    const pad = n => n.toString().padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  applyBtn.addEventListener('click', (e) => {
+    e.preventDefault(); // we will submit manually after setting dates
+    const preset = presetSelect.value;
+    const today = new Date();
+    let from, to;
+
+    const year = today.getFullYear();
+    const month = today.getMonth(); // 0-11
+
+    if (preset === 'This Month') {
+      from = new Date(year, month, 1);
+      to = today;
+    } else if (preset === 'Last Month') {
+      from = new Date(year, month - 1, 1);
+      to = new Date(year, month, 0); // last day of previous month
+    } else if (preset === 'Last 3 Months') {
+      from = new Date(year, month - 2, 1);
+      to = today;
+    } else if (preset === 'Year to Date') {
+      from = new Date(year, 0, 1);
+      to = today;
+    } else {
+      // Custom: use whatever is manually entered
+      form.submit();
+      return;
+    }
+
+    fromInput.value = formatDate(from);
+    toInput.value = formatDate(to);
+    form.submit();
+  });
+
+  // ---------------------- DATA FROM BACKEND ----------------------
+  const expenseCategories = [
+    {% for row in expense_breakdown %}
+      {
+        name: "{{ row.category }}",
+        amount: {{ row.total }},
+        budget: {{ budgets_map.get(row.category, 0) }}
+      },
+    {% endfor %}
   ];
-  const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun'];
-  const incomeSeries = [3200,3100,3400,3300,3500,3700];
-  const expenseSeries = [2500,2600,2800,2700,3000,3100];
 
-  // ----- KPIs -----
-  const income = incomeSeries[incomeSeries.length-1];
-  const expense = categories.reduce((s,c)=>s+c.amount,0);
-  const balance = income - expense;
-  document.getElementById('kpiIncome').textContent = `$${income.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-  document.getElementById('kpiExpense').textContent = `$${expense.toFixed(2)}`;
-  document.getElementById('kpiBalance').textContent = `$${balance.toFixed(2)}`;
+  const totalExpense = expenseCategories.reduce((sum, c) => sum + c.amount, 0);
 
-  // ----- Fill category table -----
-  const total = expense;
+  const monthLabels = {{ month_labels|tojson }};
+  const incomeSeries = {{ month_income|tojson }};
+  const expenseSeries = {{ month_expense|tojson }};
+
+  // ---------------------- EXPENSE TABLE ----------------------
   const tbody = document.getElementById('catBody');
-  tbody.innerHTML = '';
-  categories.forEach(c=>{
-    const share = total ? (c.amount/total*100).toFixed(1)+'%' : '-';
-    const util = c.budget ? Math.round(c.amount/c.budget*100) : 0;
+  tbody.innerHTML = "";
+
+  expenseCategories.forEach(c => {
+    const share = totalExpense ? ((c.amount / totalExpense) * 100).toFixed(1) + "%" : "-";
+    const util = c.budget ? Math.round((c.amount / c.budget) * 100) : 0;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${c.name}</td>
       <td class="text-end">$${c.amount.toFixed(2)}</td>
       <td class="text-end">${share}</td>
-      <td class="text-end">$${(c.budget||0).toFixed(2)}</td>
+      <td class="text-end">$${c.budget.toFixed(2)}</td>
       <td class="text-end">
-        <span class="badge ${util>100?'bg-danger':'bg-success'} bg-opacity-10 ${util>100?'text-danger':'text-success'}">
+        <span class="badge ${util > 100 ? 'bg-danger' : 'bg-success'} bg-opacity-10 ${util > 100 ? 'text-danger' : 'text-success'}">
           ${util}%
         </span>
-      </td>`;
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 
-  // ----- pie: expense by category -----
-  const pie = document.getElementById('pieChart').getContext('2d');
-  new Chart(pie, {
+  // ---------------------- EXPENSE PIE CHART ----------------------
+  const pieCtx = document.getElementById('pieChartExpense').getContext('2d');
+  new Chart(pieCtx, {
     type: 'doughnut',
     data: {
-      labels: categories.map(c=>c.name),
+      labels: expenseCategories.map(c => c.name),
       datasets: [{
-        data: categories.map(c=>c.amount),
-        // Chart.js will auto-pick colors; looks nice with our UI
+        data: expenseCategories.map(c => c.amount),
       }]
     },
     options: {
       responsive: true,
+      cutout: '60%',
       plugins: {
         legend: { position: 'bottom' },
-        tooltip: { callbacks:{
-          label: (ctx)=>{
-            const val = ctx.parsed;
-            const pct = total ? (val/total*100).toFixed(1) : 0;
-            return `${ctx.label}: $${val.toFixed(2)} (${pct}%)`;
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const val = ctx.parsed;
+              const pct = totalExpense ? (val / totalExpense * 100).toFixed(1) : 0;
+              return `${ctx.label}: $${val.toFixed(2)} (${pct}%)`;
+            }
           }
-        }}
-      },
-      cutout: '60%'
+        }
+      }
     }
   });
 
-  // ----- Bar: income vs expense (monthly) -----
-  const bar = document.getElementById('barChart').getContext('2d');
-  new Chart(bar, {
+  // ---------------------- INCOME vs EXPENSE BAR CHART ----------------------
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  new Chart(barCtx, {
     type: 'bar',
     data: {
       labels: monthLabels,
       datasets: [
-        { label: 'Income', data: incomeSeries },
-        { label: 'Expenses', data: expenseSeries }
+        {
+          label: 'Income',
+          data: incomeSeries,
+        },
+        {
+          label: 'Expenses',
+          data: expenseSeries,
+        }
       ]
     },
     options: {
       responsive: true,
-      scales: { y: { beginAtZero: true } }
+      scales: {
+        y: { beginAtZero: true }
+      }
     }
-  });
-
-  // ----- Filters (demo only) -----
-  document.getElementById('applyBtn')?.addEventListener('click', ()=>{
-    alert('Filters applied (demo) — later we’ll hook to backend.');
   });
 });
 </script>
