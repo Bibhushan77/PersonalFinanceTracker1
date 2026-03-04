@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Notifications | Personal Finance Tracker{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width: 700px; margin-top: 35px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-semibold">Notifications</h3>
+
+        <div class="d-flex gap-2">
+            <!-- Mark all as read -->
+            <form action="{{ url_for('notifications_mark_all') }}" method="POST">
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-check2-all"></i> Mark All Read
+                </button>
+            </form>
+
+            <!-- Clear all notifications -->
+            <form action="{{ url_for('clear_notifications') }}" method="POST">
+                <button class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash"></i> Clear All
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if notes %}
+        <div class="list-group shadow-sm">
+
+            {% for n in notes %}
+            <div class="list-group-item d-flex justify-content-between align-items-start"
+                 style="border-left: 4px solid {% if n.is_read %}#ccc{% else %}#0d6efd{% endif %};">
+
+                <div>
+                    <p class="mb-1" style="{% if not n.is_read %}font-weight:600;{% endif %}">
+                        {{ n.message }}
+                    </p>
+                    <small class="text-muted">{{ n.created_at }}</small>
+                </div>
+
+                {% if not n.is_read %}
+                <form action="{{ url_for('mark_notifications_read', nid=n.id) }}" method="POST">
+                    <button class="btn btn-sm btn-light border">
+                        <i class="bi bi-check2"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-4 mt-3">
+            <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
+            No notifications yet.
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

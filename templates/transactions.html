@@ -17,6 +17,7 @@
 <div class="mt-4">
   <div class="card p-3">
     <h5 class="mb-3">Recent Transactions</h5>
+
     <div class="table-responsive">
       <table class="table table-borderless align-middle">
         <thead class="table-light">
@@ -29,6 +30,7 @@
             <th class="text-end">Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {% if transactions %}
             {% for t in transactions %}
@@ -36,32 +38,49 @@
                 <td>{{ t.date }}</td>
                 <td>{{ t.description }}</td>
                 <td>{{ t.category }}</td>
+
                 <td>
                   {% if t.type == 'Income' %}
-                    <span class="badge bg-success bg-opacity-10 text-success">Income</span>
+                    <span class="badge bg-success bg-opacity-10 text-success">
+                      Income
+                    </span>
                   {% else %}
-                    <span class="badge bg-danger bg-opacity-10 text-danger">Expense</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger">
+                      Expense
+                    </span>
                   {% endif %}
                 </td>
+
                 <td class="text-end {% if t.type == 'Income' %}text-success{% else %}text-danger{% endif %}">
                   ${{ "%.2f"|format(t.amount) }}
                 </td>
 
-                <!-- DELETE BUTTON -->
+                <!-- ACTIONS -->
                 <td class="text-end">
-                  <form method="POST" action="{{ url_for('delete_transaction', tid=t.id) }}">
-                    <button class="btn btn-sm btn-outline-danger"
-                            onclick="return confirm('Delete this transaction?');">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </form>
+                  <div class="d-flex justify-content-end gap-2">
+                    <!-- EDIT -->
+                    <a href="{{ url_for('edit_transaction', tid=t.id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <!-- DELETE -->
+                    <form method="POST"
+                          action="{{ url_for('delete_transaction', tid=t.id) }}">
+                      <button class="btn btn-sm btn-outline-danger"
+                              onclick="return confirm('Delete this transaction?');">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             {% endfor %}
           {% else %}
             <tr>
               <td colspan="6" class="text-center text-muted py-4">
-                No transactions yet. <a href="{{ url_for('add_transaction') }}">Add your first transaction</a>.
+                No transactions yet.
+                <a href="{{ url_for('add_transaction') }}">Add your first transaction</a>.
               </td>
             </tr>
           {% endif %}
