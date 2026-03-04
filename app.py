@@ -70,28 +70,23 @@ def current_user_id():
 # ============================================================
 def send_email(to_email: str, subject: str, body: str):
     """
-    SMTP email sender.
-    If email fails, OTP will still appear in logs.
+    Simple SMTP email sender.
+    Requires APP_SMTP_USER and APP_SMTP_PASS environment variables.
+    If not set, it will just print to console instead of failing.
     """
-    print("Attempting to send email to:", to_email)
-    print("Email body:", body)
-
     if not SMTP_USER or not SMTP_PASS:
-        print("Email config missing. OTP shown in logs instead.")
+        print("Email config not set. Pretending to send email:")
+        print(f"TO: {to_email}\nSUBJECT: {subject}\nBODY: {body}")
         return
 
     try:
         msg = f"From: {SMTP_USER}\r\nTo: {to_email}\r\nSubject: {subject}\r\n\r\n{body}"
-
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, [to_email], msg.encode("utf-8"))
-
-        print("Email sent successfully!")
-
     except Exception as e:
-        print("Email sending failed:", e)
+        print("Error sending email:", e)
 
 # ============================================================
 #   NOTIFICATION HELPERS
