@@ -68,19 +68,18 @@ def current_user_id():
 # ============================================================
 #   EMAIL HELPER
 # ============================================================
+import resend
+import os
+
+resend.api_key = os.environ["RESEND_API_KEY"]
+
 def send_email(to_email, subject, body):
-    try:
-        msg = f"From: {SMTP_USER}\r\nTo: {to_email}\r\nSubject: {subject}\r\n\r\n{body}"
-
-        import smtplib
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
-            server.login(SMTP_USER, SMTP_PASS)
-            server.sendmail(SMTP_USER, [to_email], msg.encode("utf-8"))
-
-        print("Email sent")
-
-    except Exception as e:
-        print("Email sending failed:", e)
+    resend.Emails.send({
+        "from": "onboarding@resend.dev",
+        "to": [to_email],
+        "subject": subject,
+        "html": f"<p>{body}</p>"
+    })
 
 # ============================================================
 #   NOTIFICATION HELPERS
