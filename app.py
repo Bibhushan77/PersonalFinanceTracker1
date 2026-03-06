@@ -68,21 +68,16 @@ def current_user_id():
 # ============================================================
 #   EMAIL HELPER
 # ============================================================
-def send_email(to_email: str, subject: str, body: str):
-    if not SMTP_USER or not SMTP_PASS:
-        print("Email config not set")
-        return
-
+def send_email(to_email, subject, body):
     try:
         msg = f"From: {SMTP_USER}\r\nTo: {to_email}\r\nSubject: {subject}\r\n\r\n{body}"
 
         import smtplib
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
-            server.starttls()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, [to_email], msg.encode("utf-8"))
 
-        print("Email sent successfully")
+        print("Email sent")
 
     except Exception as e:
         print("Email sending failed:", e)
