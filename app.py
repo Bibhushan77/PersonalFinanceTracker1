@@ -1294,11 +1294,6 @@ def start_scheduler():
 if __name__ == "__main__":
     init_db()
 
-    # Avoid double scheduler in debug reloader
     if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         start_scheduler()
-
-    import os
-
-app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
