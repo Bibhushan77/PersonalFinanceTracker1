@@ -77,7 +77,7 @@ def send_email(to_email, subject, body):
 
     try:
         message = Mail(
-            from_email="bibhushanmjn@gmail.com",
+            from_email="personalfinancetrackerr@gmail.com",
             to_emails=to_email,
             subject=subject,
             html_content=f"<p>{body}</p>"
