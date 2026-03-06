@@ -28,7 +28,7 @@ app.secret_key = "change-me-in-real-project"
 serializer = URLSafeTimedSerializer(app.secret_key)
 # Email config (set these as environment variables on your PC)
 SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = 587
+SMTP_PORT = 465
 SMTP_USER = os.environ.get("APP_SMTP_USER")  # your email
 SMTP_PASS = os.environ.get("APP_SMTP_PASS")  # app password
 
@@ -71,18 +71,20 @@ def current_user_id():
 # ============================================================
 #   EMAIL HELPER
 # ============================================================
-import resend
-import os
-
-resend.api_key = os.environ["RESEND_API_KEY"]
-
 def send_email(to_email, subject, body):
-    resend.Emails.send({
-        "from": "personalfinancetrackerr@gmail.com",
-        "to": [to_email],
-        "subject": subject,
-        "html": f"<p>{body}</p>"
-    })
+    try:
+        msg = f"From: {SMTP_USER}\r\n"
+        msg += f"To: {to_email}\r\n"
+        msg += f"Subject: {subject}\r\n\r\n{body}"
+
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(SMTP_USER, [to_email], msg)
+
+        print("Email sent successfully")
+
+    except Exception as e:
+        print("Email sending failed:", e)
 
 # ============================================================
 #   NOTIFICATION HELPERS
