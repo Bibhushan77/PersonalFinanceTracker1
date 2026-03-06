@@ -77,7 +77,7 @@ def send_email(to_email, subject, body):
 
     try:
         message = Mail(
-            from_email="personalfinancetrackerr@gmail.com",
+            from_email="no-reply@sendgrid.net",
             to_emails=to_email,
             subject=subject,
             html_content=f"<p>{body}</p>"
