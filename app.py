@@ -78,7 +78,7 @@ resend.api_key = os.environ["RESEND_API_KEY"]
 
 def send_email(to_email, subject, body):
     resend.Emails.send({
-        "from": "onboarding@resend.dev",
+        "from": "personalfinancetrackerr@gmail.com",
         "to": [to_email],
         "subject": subject,
         "html": f"<p>{body}</p>"
