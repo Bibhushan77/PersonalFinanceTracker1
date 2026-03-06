@@ -9,6 +9,8 @@ import csv
 from io import StringIO
 from apscheduler.schedulers.background import BackgroundScheduler
 import smtplib
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import os
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -72,20 +74,22 @@ def current_user_id():
 #   EMAIL HELPER
 # ============================================================
 def send_email(to_email, subject, body):
-    try:
-        msg = f"From: {SMTP_USER}\r\n"
-        msg += f"To: {to_email}\r\n"
-        msg += f"Subject: {subject}\r\n\r\n{body}"
 
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
-            server.login(SMTP_USER, SMTP_PASS)
-            server.sendmail(SMTP_USER, [to_email], msg)
+    try:
+        message = Mail(
+            from_email="bibhushanmjn@gmail.com",
+            to_emails=to_email,
+            subject=subject,
+            html_content=f"<p>{body}</p>"
+        )
+
+        sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+        sg.send(message)
 
         print("Email sent successfully")
 
     except Exception as e:
-        print("Email sending failed:", e)
-
+        print("Email error:", e)
 # ============================================================
 #   NOTIFICATION HELPERS
 # ============================================================
