@@ -3,3 +3,4 @@ gunicorn
 apscheduler
 werkzeug
 resend
+fpdf
