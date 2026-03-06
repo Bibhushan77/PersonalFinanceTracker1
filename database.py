@@ -1,7 +1,12 @@
 import sqlite3
 import os
 
-DB_NAME =  "finance.db"
+# -------------------------------------------------
+# DATABASE LOCATION (stable path inside project)
+# -------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "finance.db")
+
 
 def get_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -55,8 +60,8 @@ def init_db():
         )
     """)
 
-        # -----------------------------
-    # RECURRING TRANSACTIONS TABLE
+    # -----------------------------
+    # RECURRING TRANSACTIONS
     # -----------------------------
     cur.execute("""
         CREATE TABLE IF NOT EXISTS recurring_transactions (
@@ -75,11 +80,11 @@ def init_db():
         )
     """)
 
-    # Ensure column exists (if DB was created before)
+    # Add column if database existed before
     try:
-        cur.execute("ALTER TABLE recurring_transactions ADD COLUMN last_reminded_on TEXT;")
-    except:
-        pass  # Column already exists
+        cur.execute("ALTER TABLE recurring_transactions ADD COLUMN last_reminded_on TEXT")
+    except sqlite3.OperationalError:
+        pass
 
     # -----------------------------
     # NOTIFICATIONS TABLE

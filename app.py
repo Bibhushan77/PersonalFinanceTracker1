@@ -16,6 +16,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_connection, init_db
 from itsdangerous import URLSafeTimedSerializer
 
+# Initialize database tables when app starts
+init_db()
+
 # ============================================================
 #   APP CONFIG
 # ============================================================
