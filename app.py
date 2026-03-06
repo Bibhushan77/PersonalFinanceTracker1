@@ -14,6 +14,8 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import get_connection, init_db
+
+init_db()
 from itsdangerous import URLSafeTimedSerializer
 
 # ============================================================
